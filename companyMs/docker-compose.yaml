@@ -1,0 +1,110 @@
+#version: '3.8'  # Docker Compose version
+#
+#services:
+#  postgres:
+#    image: postgres:latest  # Use the latest PostgreSQL image
+#    container_name: postgres_container  # Name of the PostgreSQL container
+#    environment:
+#      POSTGRES_USER: root  # PostgreSQL username
+#      POSTGRES_PASSWORD: root  # PostgreSQL password
+#      POSTGRES_DB: postgre_db  # PostgreSQL database name
+#    ports:
+#      - "5432:5432"  # Expose PostgreSQL on port 5432
+#    volumes:
+#      - pgdata:/var/lib/postgresql/data  # Persist PostgreSQL data
+#    networks:
+#      - postgres_network  # Define a custom network for inter-service communication
+#    restart: unless-stopped
+#
+#  pgadmin:
+#    image: dpage/pgadmin4:latest  # Use the latest pgAdmin image
+#    container_name: pgadmin_container  # Name of the pgAdmin container
+#    environment:
+#      PGADMIN_DEFAULT_EMAIL: admin@admin.com  # pgAdmin default login email
+#      PGADMIN_DEFAULT_PASSWORD: root  # pgAdmin default login password
+#    ports:
+#      - "5050:80"  # Expose pgAdmin on port 5050
+#    #    depends_on:
+#    #      - postgres  # pgAdmin will wait for PostgreSQL to start before running
+#    networks:
+#      - postgres_network  # Use the same network as PostgreSQL for communication
+#    restart: unless-stopped
+#
+#  zipkin:
+#    image: openzipkin/zipkin:latest  # Use the latest Zipkin image
+#    container_name: zipkin_container  # Name of the Zipkin container
+#    ports:
+#      - "9411:9411"  # Expose Zipkin on port 9411
+#    networks:
+#      - microservices_network  # Custom network for inter-service communication
+#    restart: always  # Ensure Zipkin container restarts on failure
+#
+#
+#volumes:
+#  pgdata:
+#    driver: local  # Volume for PostgreSQL data persistence
+#
+#networks:
+#  postgres_network:  # Custom network for inter-service communication
+#    driver: bridge
+
+
+
+
+
+
+version: '3.8'  # Docker Compose version
+
+services:
+  postgres:
+    image: postgres:latest  # Use the latest PostgreSQL image
+    container_name: postgres_container  # Name of the PostgreSQL container
+    environment:
+      POSTGRES_USER: root  # PostgreSQL username
+      POSTGRES_PASSWORD: root  # PostgreSQL password
+      POSTGRES_DB: postgre_db  # PostgreSQL database name
+    ports:
+      - "5432:5432"  #  Expose PostgreSQL on port 5432
+    volumes:
+      - pgdata:/var/lib/postgresql/data  # Persist PostgreSQL data
+    networks:
+      - microservices_network  # Use custom network for communication
+    restart: always  # Ensure the container restarts on failure
+
+  pgadmin:
+    image: dpage/pgadmin4:latest  # Use the latest pgAdmin image
+    container_name: pgadmin_container  # Name of the pgAdmin container
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com  # pgAdmin default login email
+      PGADMIN_DEFAULT_PASSWORD: root  # pgAdmin default login password
+    ports:
+      - "5050:80"  # Expose pgAdmin on port 5050
+    depends_on:
+      - postgres  # Ensure pgAdmin waits for PostgreSQL to start
+    networks:
+      - microservices_network  # Use custom network for communication
+    restart: always  # Ensure the container restarts on failure
+
+  zipkin:
+    image: openzipkin/zipkin:latest  # Use the latest Zipkin image
+    container_name: zipkin_container  # Name of the Zipkin container
+    ports:
+      - "9411:9411"  # Expose Zipkin on port 9411
+    networks:
+      - microservices_network  # Use custom network for communication
+    restart: always  # Ensure Zipkin container restarts on failure
+  rabbitmq:
+    image: rabbitmq:3-management  # Use RabbitMQ with the management console
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"   # RabbitMQ default port for the messaging protocol
+      - "15672:15672" # Management console port
+    networks:
+      - microservices_network
+volumes:
+  pgdata:
+    driver: local  # Volume for PostgreSQL data persistence
+
+networks:
+  microservices_network:  # Custom network for inter-service communication
+    driver: bridge
